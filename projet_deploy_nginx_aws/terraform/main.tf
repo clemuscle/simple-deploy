@@ -1,5 +1,7 @@
 provider "aws" {
   region = var.region
+  access_key = var.aws_access_key
+  secret_key = var.aws_secret_key
 }
 
 resource "tls_private_key" "ssh_key" {
@@ -24,7 +26,7 @@ resource "aws_instance" "web" {
   provisioner "local-exec" {
     command = <<EOT
       echo "[webserver]" > inventory.txt
-      echo "${self.public_ip}" >> inventory.txt
+      echo "${self.public_ip} ansible_ssh_private_key_file=./ssh_key.pem ansible_user=ec2-user" >> inventory.txt
     EOT
   }
 
@@ -61,4 +63,9 @@ resource "aws_security_group" "web_sg" {
 
 output "instance_ip" {
   value = aws_instance.web.public_ip
+}
+
+output "private_key" {
+  value     = tls_private_key.ssh_key.private_key_openssh
+  sensitive = true
 }
