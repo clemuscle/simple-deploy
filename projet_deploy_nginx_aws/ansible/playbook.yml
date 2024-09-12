@@ -1,6 +1,8 @@
 ---
 - hosts: webserver
   become: yes
+  vars:
+    ansible_python_interpreter: /usr/bin/python3
 
   tasks:
     - name: Mettre à jour les paquets
@@ -25,8 +27,16 @@
 
     - name: Ajout du fichier index.html
       copy:
-        src: ./nginx/index.html
+        src: ./nginx/html/index.html
         dest: /usr/share/nginx/html/index.html
+        owner: nginx
+        group: nginx
+        mode: '0644'
+
+    - name: Ajout du fichier image.png
+      copy:
+        src: ./nginx/html/image.png
+        dest: /usr/share/nginx/html/image.png
         owner: nginx
         group: nginx
         mode: '0644'

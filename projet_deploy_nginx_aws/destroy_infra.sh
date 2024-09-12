@@ -11,11 +11,18 @@ run_terraform() {
     echo "=== Destroy Terraform ==="
     cd "$TERRAFORM_DIR" || exit
     terraform destroy -auto-approve
+    cd - || exit
+}
+
+run_ansible() {
+    echo "=== Destroy configuration Ansible ==="
+    rm -rf "$INVENTORY_FILE" "$PRIVATE_KEY_FILE"
 }
 
 main() {
     echo "=== Destruction de l'infrastructure ==="
     run_terraform
+    run_ansible
     echo "=== Destruction terminé avec succès ==="
 }
 
