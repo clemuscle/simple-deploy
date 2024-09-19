@@ -1,0 +1,16 @@
+http:
+  routers:
+    my-router:
+      rule: "Host(`example.com`)"
+      service: my-service
+      entryPoints:
+        - web
+        - websecure
+      tls:
+        certResolver: letsencrypt
+
+  services:
+    my-service:
+      loadBalancer:
+        servers:
+          - url: "http://my-container:80"

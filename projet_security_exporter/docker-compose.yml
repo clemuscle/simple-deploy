@@ -1,0 +1,89 @@
+version: '3'
+
+services:
+  # Prometheus service
+  prometheus:
+    image: docker.io/prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    networks:
+      - monitoring
+
+  # Grafana service
+  grafana:
+    image: docker.io/grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring
+
+  # Alertmanager service
+  alertmanager:
+    image: docker.io/prom/alertmanager:latest
+    volumes:
+      - ./alertmanager/config.yml:/etc/alertmanager/config.yml
+    ports:
+      - "9093:9093"
+    networks:
+      - monitoring
+
+  # Loki service for log aggregation
+  loki:
+    image: docker.io/grafana/loki:2.7.0
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki/config.yml:/etc/loki/config.yml
+    networks:
+      - monitoring
+
+  # Node exporter to monitor system metrics
+  node_exporter:
+    image: docker.io/prom/node-exporter:latest
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring
+
+  # Blackbox Exporter to monitor external services
+  blackbox_exporter:
+    image: docker.io/prom/blackbox-exporter:latest
+    ports:
+      - "9115:9115"
+    networks:
+      - monitoring
+
+  # Wazuh manager for security monitoring
+  wazuh-manager:
+    image: docker.io/wazuh/wazuh:latest
+    ports:
+      - "55000:55000" # Port for agent communication
+      - "1514:1514/udp" # Port for syslog
+    volumes:
+      - ./wazuh:/var/ossec
+    networks:
+      - monitoring
+
+  wazuh-api:
+    image: docker.io/wazuh/wazuh-api:latest
+    depends_on:
+      - wazuh-manager
+    ports:
+      - "55000:55000"
+    environment:
+      - WAZUH_API_PASSWORD=admin
+    networks:
+      - monitoring
+
+networks:
+  monitoring:
+    driver: bridge

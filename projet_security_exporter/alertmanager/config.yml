@@ -1,0 +1,18 @@
+global:
+  smtp_smarthost: 'smtp.gmail.com:587'
+  smtp_from: 'your-email@gmail.com'
+  smtp_auth_username: 'your-email@gmail.com'
+  smtp_auth_password: 'your-email-password'
+
+route:
+  receiver: 'email-alert'
+
+receivers:
+  - name: 'email-alert'
+    email_configs:
+      - to: 'admin@example.com'
+
+  - name: 'slack-alert'
+    slack_configs:
+      - api_url: 'https://hooks.slack.com/services/your/slack/webhook'
+        channel: '#alerts'
